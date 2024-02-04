@@ -9,19 +9,13 @@ import {
   TextInput,
   Button,
 } from "react-native";
-import { useDispatch } from "react-redux";
-import { authUser } from "../actions/actions";
 
 const StartScreen = ({ navigation }) => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const dispatch = useDispatch();
-
-  const handleLogin = () => {
-    dispatch(authUser(username, password));
-    //if successful navigate to homescreen
-    // Inside a component (e.g., a button press handler in HomeScreen)
-    () => navigation.navigate("Home");
+  const naviCreate = () => {
+    navigation.navigate("Create");
+  };
+  const naviRecord = () => {
+    navigation.navigate("Tabs");
   };
 
   return (
@@ -39,21 +33,14 @@ const StartScreen = ({ navigation }) => {
 
       <SafeAreaView style={styles.loginContainer}>
         <Text style={styles.login}>Login:</Text>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Username"
-          value={username}
-          onChangeText={(text) => setUsername(text)}
-        />
+        <TextInput style={styles.textInput} placeholder="Username" />
         <TextInput
           style={styles.textInput}
           placeholder="Password"
           secureTextEntry={true}
-          value={password}
-          onChangeText={(text) => setPassword(text)}
         />
-        <Button title="Login" onPress={handleLogin} />
-        <Button title="Create Account" />
+        <Button title="Login" onPress={naviRecord} />
+        <Button title="Create Account" onPress={naviCreate} />
       </SafeAreaView>
     </View>
   );
