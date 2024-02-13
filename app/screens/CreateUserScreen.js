@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Button,
   SafeAreaView,
@@ -7,17 +7,56 @@ import {
   StyleSheet,
   Dimensions,
 } from "react-native";
+import axios from "axios";
 
 const CreateUserScreen = ({ navigation }) => {
-  const navi = () => {
-    navigation.navigate("Tabs");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = () => {
+    if (username === "" || email === "" || password === "") {
+      alert("All fields required!");
+      return;
+    }
+    axios
+      .post("http://localhost:3001/userData", {
+        username,
+        email,
+        password,
+      })
+      .then(() => navigation.navigate("Tabs"))
+      .catch((err) => console.log(err));
+    return false;
   };
+
   return (
     <SafeAreaView style={styles.center}>
       <Text style={styles.createTitle}>Create User</Text>
-      <TextInput style={styles.buttonSpace} placeholder="Username" />
-      <TextInput style={styles.buttonSpace} placeholder="Password" />
-      <Button title="Create" onPress={navi} />
+      <TextInput
+        style={styles.buttonSpace}
+        placeholder="Email"
+        onChangeText={(e) => setEmail(e)}
+        value={email}
+      />
+      <TextInput
+        style={styles.buttonSpace}
+        placeholder="Username"
+        onChangeText={(e) => setUsername(e)}
+        value={username}
+      />
+      <TextInput
+        style={styles.buttonSpace}
+        placeholder="Password"
+        onChangeText={(e) => setPassword(e)}
+        value={password}
+      />
+      <Button
+        title="Create"
+        onPress={() => {
+          handleSubmit();
+        }}
+      />
     </SafeAreaView>
   );
 };

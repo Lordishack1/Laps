@@ -9,13 +9,23 @@ import {
   TextInput,
   Button,
 } from "react-native";
+import axios from "axios";
+import { KeyAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 const StartScreen = ({ navigation }) => {
-  const naviCreate = () => {
-    navigation.navigate("Create");
-  };
-  const naviRecord = () => {
-    navigation.navigate("Tabs");
+  const [name, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const handleSubmit = async () => {
+    if (name === "" || email === "" || password === "") {
+      alert("All fields are required");
+      return;
+    }
+    await axios.post("http://localhost:8001/api/signin", {
+      name,
+      email,
+      password,
+    });
+    alert("Sign In Successful");
   };
 
   return (
@@ -30,17 +40,32 @@ const StartScreen = ({ navigation }) => {
         <Text style={styles.title}>Welcome to Laps!</Text>
         <Text>Where all your stats are in one place</Text>
       </SafeAreaView>
-
       <SafeAreaView style={styles.loginContainer}>
         <Text style={styles.login}>Login:</Text>
-        <TextInput style={styles.textInput} placeholder="Username" />
+        <TextInput
+          style={styles.textInput}
+          placeholder="Username"
+          onChangeText={() => setUsername}
+        />
         <TextInput
           style={styles.textInput}
           placeholder="Password"
           secureTextEntry={true}
+          onChangeText={() => setPassword}
         />
-        <Button title="Login" onPress={naviRecord} />
-        <Button title="Create Account" onPress={naviCreate} />
+        <Button
+          title="Login"
+          onPress={() => {
+            handleSubmit();
+            navigation.navigate("Tabs");
+          }}
+        />
+        <Button
+          title="Create Account"
+          onPress={() => {
+            navigation.navigate("Create");
+          }}
+        />
       </SafeAreaView>
     </View>
   );

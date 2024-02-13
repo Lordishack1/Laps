@@ -18,31 +18,11 @@ const Tab = createBottomTabNavigator();
 const TabNavi = () => {
   return (
     <Tab.Navigator initialRouteName="Record">
-      <Tab.Screen
-        options={{ headerShown: false }}
-        name="Map"
-        component={MapScreen}
-      />
-      <Tab.Screen
-        options={{ headerShown: false }}
-        name="Friends"
-        component={FriendsScreen}
-      />
-      <Tab.Screen
-        options={{ headerShown: false }}
-        name="Record"
-        component={RecordScreen}
-      />
-      <Tab.Screen
-        options={{ headerShown: false }}
-        name="Stats"
-        component={StatsScreen}
-      />
-      <Tab.Screen
-        options={{ headerShown: false }}
-        name="Settings"
-        component={SettingsScreen}
-      />
+      <Tab.Screen name="Map" component={MapScreen} />
+      <Tab.Screen name="Friends" component={FriendsScreen} />
+      <Tab.Screen name="Record" component={RecordScreen} />
+      <Tab.Screen name="Stats" component={StatsScreen} />
+      <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
 };
