@@ -6,28 +6,32 @@ import {
   TextInput,
   StyleSheet,
   Dimensions,
+  Alert,
 } from "react-native";
 import axios from "axios";
 
 const CreateUserScreen = ({ navigation }) => {
-  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = () => {
-    if (username === "" || email === "" || password === "") {
-      alert("All fields required!");
-      return;
+  const handleSubmit = async () => {
+    try {
+      if (!name || !email || !password) {
+        Alert.alert("Please fill all fields");
+        return;
+      }
+      const { data } = await axios.post(
+        "http://172.27.2.32:8080/api/v1/auth/register",
+        { name, email, password }
+      );
+      alert(data && data.message);
+      navigation.navigate("Login");
+      console.log("Register Data => ", { name, email, password });
+    } catch (error) {
+      alert(error.response.data.message);
+      console.log(error);
     }
-    axios
-      .post("http://localhost:3001/userData", {
-        username,
-        email,
-        password,
-      })
-      .then(() => navigation.navigate("Tabs"))
-      .catch((err) => console.log(err));
-    return false;
   };
 
   return (
@@ -35,15 +39,15 @@ const CreateUserScreen = ({ navigation }) => {
       <Text style={styles.createTitle}>Create User</Text>
       <TextInput
         style={styles.buttonSpace}
-        placeholder="Email"
-        onChangeText={(e) => setEmail(e)}
-        value={email}
+        placeholder="Name"
+        onChangeText={(e) => setName(e)}
+        value={name}
       />
       <TextInput
         style={styles.buttonSpace}
-        placeholder="Username"
-        onChangeText={(e) => setUsername(e)}
-        value={username}
+        placeholder="Email"
+        onChangeText={(e) => setEmail(e)}
+        value={email}
       />
       <TextInput
         style={styles.buttonSpace}
@@ -66,7 +70,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   createTitle: {
-    fontSize: "40%",
+    fontSize: `40%`,
     paddingBottom: "10%",
   },
   buttonSpace: {

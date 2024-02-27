@@ -8,26 +8,41 @@ import {
   Text,
   TextInput,
   Button,
+  Alert,
 } from "react-native";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { KeyAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 const StartScreen = ({ navigation }) => {
-  const [name, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const handleSubmit = async () => {
-    if (name === "" || email === "" || password === "") {
-      alert("All fields are required");
-      return;
-    }
-    await axios.post("http://localhost:8001/api/signin", {
-      name,
-      email,
-      password,
-    });
-    alert("Sign In Successful");
-  };
+  const [email, setEmail] = useState("");
 
+  const handleSubmit = async () => {
+    try {
+      if (!email || !password) {
+        Alert.alert("Please fill all fields");
+        return;
+      }
+      const { data } = await axios.post(
+        "http://172.27.2.32:8080/api/v1/auth/login",
+        { email, password }
+      );
+      await AsyncStorage.setItem("@auth", JSON.stringify(data));
+      alert(data && data.message);
+      navigation.navigate("Tabs");
+      console.log("Login Data => ", { email, password });
+    } catch (error) {
+      alert(error.response.data.message);
+      console.log(error);
+    }
+  };
+  //temp function to check local storage data
+  const getLocalStorageData = async () => {
+    let data = await AsyncStorage.getItem("@auth");
+    console.log("Local Storage ==> ", data);
+  };
+  getLocalStorageData();
   return (
     <View>
       <ImageBackground
@@ -44,20 +59,19 @@ const StartScreen = ({ navigation }) => {
         <Text style={styles.login}>Login:</Text>
         <TextInput
           style={styles.textInput}
-          placeholder="Username"
-          onChangeText={() => setUsername}
+          placeholder="Email"
+          onChangeText={(e) => setEmail(e)}
         />
         <TextInput
           style={styles.textInput}
           placeholder="Password"
           secureTextEntry={true}
-          onChangeText={() => setPassword}
+          onChangeText={(e) => setPassword(e)}
         />
         <Button
           title="Login"
           onPress={() => {
             handleSubmit();
-            navigation.navigate("Tabs");
           }}
         />
         <Button
