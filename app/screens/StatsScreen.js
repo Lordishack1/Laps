@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     padding: "2%",
   },
   tQuestion: {
-    fontSize: `120%`,
+    fontSize: "120%",
     justifyContent: "center",
   },
 });

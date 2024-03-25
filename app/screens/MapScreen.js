@@ -1,11 +1,12 @@
 import React from "react";
 import { View, Text, Button, SafeAreaView, StyleSheet } from "react-native";
+import MapView from "react-native-maps";
 
 function MapScreen(props) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.flexy}>
-        <Text style={styles.tQuestion}>Map Screen!!!</Text>
+        <MapView style={styles.map} />
       </View>
     </SafeAreaView>
   );
@@ -19,9 +20,9 @@ const styles = StyleSheet.create({
   flexy: {
     flex: 1,
   },
-  tQuestion: {
-    fontSize: "20%",
-    justifyContent: "center",
+  map: {
+    width: "100%",
+    height: "100%",
   },
 });
 

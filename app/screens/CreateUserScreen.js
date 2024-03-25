@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   createTitle: {
-    fontSize: `40%`,
+    fontSize: "40%",
     paddingBottom: "10%",
   },
   buttonSpace: {

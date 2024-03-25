@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,45 +8,135 @@ import {
   TouchableHighlight,
   Image,
   Dimensions,
+  Pressable,
 } from "react-native";
+import * as Location from "expo-location";
 
 const RecordScreen = () => {
+  const [isTracking, setIsTracking] = useState(false);
+  const [location, setLocation] = useState(null);
+  const [locationSubscription, setLocationSubscription] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [totalDistance, setTotalDistance] = useState(0);
+  const [topSpeed, setTopSpeed] = useState(0);
+
+  useEffect(() => {
+    const startTracking = async () => {
+      if (isTracking) {
+        try {
+          await Location.requestForegroundPermissionsAsync();
+          const subscription = await Location.watchPositionAsync(
+            { distanceInterval: 1 },
+            (newLocation) => {
+              updateLocation(newLocation);
+            }
+          );
+          setLocationSubscription(subscription);
+        } catch (error) {
+          console.error("Error starting tracking:", error);
+          setErrorMsg("Error starting tracking");
+        }
+      } else {
+        if (locationSubscription) {
+          try {
+            locationSubscription.remove();
+          } catch (error) {
+            console.error("Error stopping tracking:", error);
+          }
+        }
+      }
+    };
+    startTracking();
+    return () => {
+      if (locationSubscription) {
+        locationSubscription.remove();
+        setLocationSubscription(null);
+      }
+    };
+  }, [isTracking, locationSubscription]);
+
+  const toggleTracking = () => {
+    setIsTracking(!isTracking);
+  };
+
+  const updateLocation = (newLocation) => {
+    if (location) {
+      const distance = calculateDistance(location.coords, newLocation.coords);
+      setTotalDistance(totalDistance + distance);
+    }
+    setLocation(newLocation);
+  };
+
+  const calculateDistance = (coords1, coords2) => {
+    const R = 6371000; // Earth radius in meters
+    const dLat = ((coords2.latitude - coords1.latitude) * Math.PI) / 180;
+    const dLon = ((coords2.longitude - coords1.longitude) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((coords1.latitude * Math.PI) / 180) *
+        Math.cos((coords2.latitude * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    const distanceMiles = distance * 0.000621371;
+    return distanceMiles;
+  };
+
+  const topSpeedChecker = (speed) => {
+    if (speed > topSpeed) {
+      setTopSpeed(speed);
+    }
+    return topSpeed;
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.flexy}>
         <Text style={styles.tQuestion}>What will you be riding today?</Text>
       </View>
       <View style={styles.qContainer}>
-        <TouchableHighlight style={styles.button}>
+        <Pressable style={styles.button}>
           <Image
             style={styles.snowboardingImg}
             source={require("../assets/snowboarding.png")}
           ></Image>
-        </TouchableHighlight>
-        <TouchableHighlight style={styles.button}>
+        </Pressable>
+        <Pressable style={styles.button}>
           <Image
             style={styles.snowboardingImg}
             source={require("../assets/skiing.png")}
           ></Image>
-        </TouchableHighlight>
+        </Pressable>
       </View>
       <View style={styles.stats}>
-        <Text>Previous run stats</Text>
+        <Text>Todays Stats</Text>
       </View>
-
       <View style={styles.bord}>
         <View style={styles.stat1}>
-          <Text>12 mph</Text>
+          <Text>
+            {location?.coords?.speed
+              ? topSpeedChecker(location.coords.speed * 2.23694).toFixed(2)
+              : topSpeed.toFixed(2)}{" "}
+            MPH
+          </Text>
           <Text>Top Speed</Text>
+          <Text>
+            {location?.coords?.speed
+              ? (location.coords.speed * 2.23694).toFixed(2)
+              : "0.00"}{" "}
+            MPH
+          </Text>
+          <Text>current Speed</Text>
         </View>
         <View style={styles.container2}>
           <View style={styles.stat2}>
             <Text>1586 ft</Text>
-            <Text>Tallest Run</Text>
+            <Text>Vertical</Text>
           </View>
           <View style={styles.stat2}>
-            <Text>0.8 m</Text>
-            <Text>Longest Run</Text>
+            <Text>{totalDistance.toFixed(2)}M</Text>
+            <Text>Distance</Text>
           </View>
           <View style={styles.stat2}>
             <Text>75</Text>
@@ -55,7 +145,21 @@ const RecordScreen = () => {
         </View>
       </View>
       <View style={styles.record}>
-        <Button title="RECORD"></Button>
+        {isTracking ? (
+          <Button
+            title="STOP RECORDING"
+            onPress={() => {
+              toggleTracking();
+            }}
+          ></Button>
+        ) : (
+          <Button
+            title="RECORD"
+            onPress={() => {
+              toggleTracking();
+            }}
+          ></Button>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -119,7 +223,7 @@ const styles = StyleSheet.create({
   },
   tQuestion: {
     paddingTop: "3%",
-    fontSize: `20%`,
+    fontSize: "20%",
   },
 });
 

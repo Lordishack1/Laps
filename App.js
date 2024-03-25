@@ -30,7 +30,7 @@ const TabNavi = () => {
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="Tabs">
         <Stack.Screen
           options={{ headerShown: false }}
           name="Login"
