@@ -5,7 +5,7 @@ function FriendsScreen(props) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.flexy}>
-        <Text style={styles.tQuestion}>Friends Screen!!!</Text>
+        <Text style={styles.tQuestion}>Coming Soon!</Text>
       </View>
     </SafeAreaView>
   );
@@ -14,14 +14,14 @@ function FriendsScreen(props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "space-between",
+    alignItems: "center",
   },
   flexy: {
-    flex: 1,
+    flex: 0.1,
   },
   tQuestion: {
-    fontSize: "20%",
-    justifyContent: "center",
+    paddingTop: "3%",
+    fontSize: 25,
   },
 });
 

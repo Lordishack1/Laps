@@ -61,6 +61,12 @@ const CreateUserScreen = ({ navigation }) => {
           handleSubmit();
         }}
       />
+      <Button
+        title="Already have an account"
+        onPress={() => {
+          navigation.navigate("Login");
+        }}
+      />
     </SafeAreaView>
   );
 };

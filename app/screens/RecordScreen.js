@@ -2,23 +2,32 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  Button,
   SafeAreaView,
   StyleSheet,
-  TouchableHighlight,
   Image,
   Dimensions,
   Pressable,
 } from "react-native";
 import * as Location from "expo-location";
+import { useUser } from "../context/userContext.js";
+import MatComIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import axios from "axios";
 
 const RecordScreen = () => {
   const [isTracking, setIsTracking] = useState(false);
   const [location, setLocation] = useState(null);
   const [locationSubscription, setLocationSubscription] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
-  const [totalDistance, setTotalDistance] = useState(0);
-  const [topSpeed, setTopSpeed] = useState(0);
+  const { totalDistance, setTotalDistance } = useUser();
+  const [tempTotalDistance, setTempTotalDistance] = useState(0);
+  const { topSpeed, setTopSpeed } = useUser();
+  const [tempTopSpeed, setTempTopSpeed] = useState(0);
+  const [snowboardingt, setSnowboardingt] = useState(false);
+  const { snowboarding, setSnowboarding } = useUser();
+  const [skiingt, setSkiingt] = useState();
+  const { skiing, setSkiing } = useUser();
+  const { userEmail } = useUser();
+  const [first, setfirst] = useState(true);
 
   useEffect(() => {
     const startTracking = async () => {
@@ -26,7 +35,7 @@ const RecordScreen = () => {
         try {
           await Location.requestForegroundPermissionsAsync();
           const subscription = await Location.watchPositionAsync(
-            { distanceInterval: 1 },
+            { timeInterval: 2 },
             (newLocation) => {
               updateLocation(newLocation);
             }
@@ -55,20 +64,108 @@ const RecordScreen = () => {
     };
   }, [isTracking, locationSubscription]);
 
+  useEffect(() => {
+    if (!isTracking && first == false) {
+      userStateSet();
+      handleData(userEmail, topSpeed, totalDistance, snowboarding, skiing);
+    }
+  }, [isTracking]);
+
+  const userStateSet = () => {
+    setTotalDistance(tempTotalDistance);
+    setSkiing(skiingt);
+    setSnowboarding(snowboardingt);
+    setTopSpeed(tempTopSpeed);
+  };
+
   const toggleTracking = () => {
-    setIsTracking(!isTracking);
+    if (skiingt || snowboardingt) {
+      if (skiingt) {
+        toggleSkiing();
+      } else {
+        toggleSnowboarding();
+      }
+      setIsTracking(!isTracking);
+      setfirst(false);
+      if (isTracking) {
+        handleEntry();
+      }
+    } else {
+      alert("Please select Skiing or Snowboarding");
+    }
+  };
+
+  const toggleSnowboarding = () => {
+    if (!snowboardingt) {
+      setSnowboardingt(true);
+      setSkiingt(false);
+    }
+  };
+
+  const toggleSkiing = () => {
+    if (!skiingt) {
+      setSkiingt(true);
+      setSnowboardingt(false);
+    }
+  };
+
+  const handleEntry = () => {
+    setTempTotalDistance(0);
+    setTempTopSpeed(0);
+    setSkiingt(false);
+    setSnowboardingt(false);
+  };
+
+  const handleData = async () => {
+    try {
+      console.log(
+        "speed: " +
+          topSpeed +
+          " Distance: " +
+          totalDistance +
+          " email: " +
+          userEmail
+      );
+      if (!userEmail || !topSpeed || !totalDistance) {
+        alert("error in handle entry");
+        return;
+      }
+
+      const { data } = await axios.post(
+        "http://192.168.1.19:8080/api/v1/auth/record",
+        { userEmail, topSpeed, totalDistance, snowboarding, skiing }
+      );
+
+      alert(data && data.message);
+      console.log(
+        "speed, distance, snowboarding, skiing: " +
+          data.topSpeed +
+          " " +
+          data.totalDistance +
+          " " +
+          data.snowboarding +
+          " " +
+          data.skiing
+      );
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const updateLocation = (newLocation) => {
     if (location) {
       const distance = calculateDistance(location.coords, newLocation.coords);
-      setTotalDistance(totalDistance + distance);
+      setTempTotalDistance((prevTotalDistance) => prevTotalDistance + distance);
+
+      if (newLocation.coords.speed > tempTopSpeed) {
+        setTempTopSpeed(newLocation.coords.speed);
+      }
     }
     setLocation(newLocation);
   };
 
   const calculateDistance = (coords1, coords2) => {
-    const R = 6371000; // Earth radius in meters
+    const R = 6371000;
     const dLat = ((coords2.latitude - coords1.latitude) * Math.PI) / 180;
     const dLon = ((coords2.longitude - coords1.longitude) * Math.PI) / 180;
     const a =
@@ -84,10 +181,10 @@ const RecordScreen = () => {
   };
 
   const topSpeedChecker = (speed) => {
-    if (speed > topSpeed) {
-      setTopSpeed(speed);
+    if (speed > tempTopSpeed) {
+      setTempTopSpeed(speed);
     }
-    return topSpeed;
+    return tempTopSpeed;
   };
 
   return (
@@ -96,13 +193,19 @@ const RecordScreen = () => {
         <Text style={styles.tQuestion}>What will you be riding today?</Text>
       </View>
       <View style={styles.qContainer}>
-        <Pressable style={styles.button}>
+        <Pressable
+          style={snowboardingt ? styles.buttonLeft : styles.buttonLeft2}
+          onPress={toggleSnowboarding}
+        >
           <Image
             style={styles.snowboardingImg}
             source={require("../assets/snowboarding.png")}
           ></Image>
         </Pressable>
-        <Pressable style={styles.button}>
+        <Pressable
+          style={skiingt ? styles.buttonRight : styles.buttonRight2}
+          onPress={toggleSkiing}
+        >
           <Image
             style={styles.snowboardingImg}
             source={require("../assets/skiing.png")}
@@ -110,55 +213,55 @@ const RecordScreen = () => {
         </Pressable>
       </View>
       <View style={styles.stats}>
-        <Text>Todays Stats</Text>
+        <Text style={styles.sizeF}>Todays Stats</Text>
       </View>
       <View style={styles.bord}>
         <View style={styles.stat1}>
-          <Text>
-            {location?.coords?.speed
-              ? topSpeedChecker(location.coords.speed * 2.23694).toFixed(2)
-              : topSpeed.toFixed(2)}{" "}
-            MPH
-          </Text>
-          <Text>Top Speed</Text>
-          <Text>
-            {location?.coords?.speed
-              ? (location.coords.speed * 2.23694).toFixed(2)
-              : "0.00"}{" "}
-            MPH
-          </Text>
-          <Text>current Speed</Text>
+          <Text style={styles.sizeF}>{tempTotalDistance.toFixed(2)}M</Text>
+          <Text style={styles.sizeF}>Distance</Text>
         </View>
         <View style={styles.container2}>
           <View style={styles.stat2}>
-            <Text>1586 ft</Text>
-            <Text>Vertical</Text>
+            <Text style={styles.sizeF}>
+              {location?.coords?.speed
+                ? (location.coords.speed * 2.23694).toFixed(2)
+                : "0.00"}
+              MPH
+            </Text>
+            <Text style={styles.sizeF}>current Speed</Text>
           </View>
           <View style={styles.stat2}>
-            <Text>{totalDistance.toFixed(2)}M</Text>
-            <Text>Distance</Text>
-          </View>
-          <View style={styles.stat2}>
-            <Text>75</Text>
-            <Text>Total Runs</Text>
+            <Text style={styles.sizeF}>
+              {location?.coords?.speed
+                ? topSpeedChecker(location.coords.speed * 2.23694).toFixed(2)
+                : tempTopSpeed.toFixed(2)}
+              MPH
+            </Text>
+            <Text style={styles.sizeF}>Top Speed</Text>
           </View>
         </View>
       </View>
       <View style={styles.record}>
         {isTracking ? (
-          <Button
-            title="STOP RECORDING"
+          <MatComIcons
+            name="pause-circle-outline"
+            size="65"
+            color="red"
+            //title="STOP RECORDING"
             onPress={() => {
               toggleTracking();
             }}
-          ></Button>
+          ></MatComIcons>
         ) : (
-          <Button
-            title="RECORD"
+          <MatComIcons
+            name="record-circle-outline"
+            size="65"
+            color="red"
+            //title="RECORD"
             onPress={() => {
               toggleTracking();
             }}
-          ></Button>
+          ></MatComIcons>
         )}
       </View>
     </SafeAreaView>
@@ -171,10 +274,13 @@ const styles = StyleSheet.create({
   record: {
     flex: 0.1,
   },
+  sizeF: {
+    fontSize: 20,
+  },
   stat1: {
     flex: 1,
     alignItems: "center",
-    paddingTop: "7%",
+    paddingTop: "10%",
   },
   stat2: {
     flex: 1,
@@ -202,13 +308,38 @@ const styles = StyleSheet.create({
   },
   snowboardingImg: {
     height: height * 0.2,
-    width: width * 0.4,
+    width: width * 0.37,
     resizeMode: "cover",
   },
-  button: {
+  buttonLeft: {
+    padding: "3.5%",
+    borderWidth: "2%",
+    borderRadius: 40,
+    height: height * 0.25,
+    marginRight: "2%",
+    backgroundColor: "lightgrey",
+  },
+  buttonLeft2: {
+    padding: "3.5%",
+    borderWidth: "2%",
+    borderRadius: 40,
+    height: height * 0.25,
+    marginRight: "2%",
+  },
+  buttonRight: {
     padding: "5%",
     borderWidth: "2%",
+    borderRadius: 40,
     height: height * 0.25,
+    marginLeft: "2%",
+    backgroundColor: "lightgrey",
+  },
+  buttonRight2: {
+    padding: "5%",
+    borderWidth: "2%",
+    borderRadius: 40,
+    height: height * 0.25,
+    marginLeft: "2%",
   },
   qContainer: {
     flex: 0.3,
@@ -223,7 +354,7 @@ const styles = StyleSheet.create({
   },
   tQuestion: {
     paddingTop: "3%",
-    fontSize: "20%",
+    fontSize: 25,
   },
 });
 

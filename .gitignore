@@ -3,6 +3,9 @@
 # dependencies
 node_modules/
 
+# ski map locations
+*.geojson
+
 # Expo
 .expo/
 dist/

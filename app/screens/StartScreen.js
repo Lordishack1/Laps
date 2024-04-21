@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ImageBackground,
   StyleSheet,
@@ -9,14 +9,30 @@ import {
   TextInput,
   Button,
   Alert,
+  KeyboardAvoidingView,
+  Image,
 } from "react-native";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { KeyAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { useUser } from "../context/userContext.js";
 
 const StartScreen = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
+  const [isKeyVisible, setKeyVisible] = useState(false);
+  const { userEmail, setUserEmail } = useUser();
+
+  useEffect(() => {
+    console.log("User email changed:", userEmail);
+  }, [userEmail]);
+
+  const handleFocus = () => {
+    setKeyVisible(true);
+  };
+
+  const handleBlur = () => {
+    setKeyVisible(false);
+  };
 
   const handleSubmit = async () => {
     try {
@@ -25,10 +41,10 @@ const StartScreen = ({ navigation }) => {
         return;
       }
       const { data } = await axios.post(
-        "http://172.27.2.32:8080/api/v1/auth/login",
+        "http://192.168.1.19:8080/api/v1/auth/login",
         { email, password }
       );
-      await AsyncStorage.setItem("@auth", JSON.stringify(data));
+      setUserEmail(email);
       alert(data && data.message);
       navigation.navigate("Tabs");
       console.log("Login Data => ", { email, password });
@@ -37,61 +53,74 @@ const StartScreen = ({ navigation }) => {
       console.log(error);
     }
   };
-  //temp function to check local storage data
-  const getLocalStorageData = async () => {
-    let data = await AsyncStorage.getItem("@auth");
-    console.log("Local Storage ==> ", data);
-  };
-  getLocalStorageData();
+  /*<KeyboardAwareScrollView
+        contentContainerStyle={
+          isKeyVisible ? styles.loginContainerUp : styles.loginContainer
+        }
+      ></KeyboardAwareScrollView>
+        <SafeAreaView style={styles.loginContainer}>
+        
+        
+        <Text style={styles.title}>Welcome to Laps!</Text>*/
   return (
-    <View>
-      <ImageBackground
-        resizeMode="cover"
-        style={styles.background}
-        source={require("../assets/snowboarderTrick.jpeg")}
-      />
+    <KeyboardAvoidingView>
+      <View>
+        <ImageBackground
+          style={styles.background}
+          resizeMode="cover"
+          source={require("../assets/ima.jpeg")}
+        />
 
-      <SafeAreaView style={styles.titlesAlign}>
-        <Text style={styles.title}>Welcome to Laps!</Text>
-        <Text>Where all your stats are in one place</Text>
-      </SafeAreaView>
-      <SafeAreaView style={styles.loginContainer}>
-        <Text style={styles.login}>Login:</Text>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Email"
-          onChangeText={(e) => setEmail(e)}
-        />
-        <TextInput
-          style={styles.textInput}
-          placeholder="Password"
-          secureTextEntry={true}
-          onChangeText={(e) => setPassword(e)}
-        />
-        <Button
-          title="Login"
-          onPress={() => {
-            handleSubmit();
-          }}
-        />
-        <Button
-          title="Create Account"
-          onPress={() => {
-            navigation.navigate("Create");
-          }}
-        />
-      </SafeAreaView>
-    </View>
+        <SafeAreaView style={styles.titlesAlign}>
+          <Image
+            style={styles.logo}
+            source={require("../assets/LapsLogo.webp")}
+          ></Image>
+          <Text style={styles.slogan}>
+            Where all your stats are in one place
+          </Text>
+        </SafeAreaView>
+
+        <SafeAreaView style={styles.loginContainer}>
+          <Text style={styles.login}>Login:</Text>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Email"
+            onChangeText={(e) => setEmail(e)}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+          />
+          <TextInput
+            style={styles.textInput}
+            placeholder="Password"
+            secureTextEntry={true}
+            onChangeText={(e) => setPassword(e)}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+          />
+          <Button
+            title="Login"
+            onPress={() => {
+              handleSubmit();
+            }}
+            color={"black"}
+          />
+          <Button
+            title="Create Account"
+            onPress={() => {
+              navigation.navigate("Create");
+            }}
+            color={"black"}
+          />
+        </SafeAreaView>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
-//calculating font size for the title
-const windowWidth = Dimensions.get("screen").width;
-const fontSizePercentage = 10;
-const fontSize = (windowWidth * fontSizePercentage) / 100;
-
 //calculating font size for the subtitle
-const fontSizePercentageSub = 3;
-const fontSizSub = (windowWidth * fontSizePercentageSub) / 100;
+const windowWidth = Dimensions.get("screen").width;
+const fontSizePercentage = 5;
+const fontSize = (windowWidth * fontSizePercentage) / 100;
 
 //calculating font size for the Login
 const fontSizePercentageLogin = 8;
@@ -99,24 +128,30 @@ const fontSizLogin = (windowWidth * fontSizePercentageLogin) / 100;
 
 const styles = StyleSheet.create({
   background: {
+    //backgroundColor: "black",
     flex: 1,
     width: Dimensions.get("screen").width,
     height: Dimensions.get("screen").height,
   },
   titlesAlign: {
     alignItems: "center",
-    height: "50%",
+    height: "15%",
     marginBottom: "10%",
   },
   title: {
     fontSize: fontSize,
     paddingBottom: 5,
   },
-  subTitle: {
-    fontSize: fontSizSub,
-  },
   loginContainer: {
     alignItems: "center",
+    marginTop: "70%",
+  },
+  loginContainerUp: {
+    alignItems: "center",
+  },
+  loginContainerUpUp: {
+    alignItems: "center",
+    marginTop: "10%",
   },
   login: {
     fontSize: fontSizLogin,
@@ -131,6 +166,20 @@ const styles = StyleSheet.create({
     color: "black",
     textAlign: "center",
     marginBottom: "8%",
+  },
+  keyView: {
+    height: "100%",
+  },
+  logo: {
+    marginTop: "10%",
+    width: Dimensions.get("screen").width / 2,
+    height: Dimensions.get("screen").width / 2,
+    borderWidth: "1px solid",
+    borderRadius: "100",
+  },
+  slogan: {
+    marginTop: "10%",
+    fontSize: fontSize,
   },
 });
 
