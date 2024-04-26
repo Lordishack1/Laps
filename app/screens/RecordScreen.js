@@ -35,7 +35,7 @@ const RecordScreen = () => {
         try {
           await Location.requestForegroundPermissionsAsync();
           const subscription = await Location.watchPositionAsync(
-            { timeInterval: 2 },
+            { distanceInterval: 2 },
             (newLocation) => {
               updateLocation(newLocation);
             }
@@ -62,20 +62,30 @@ const RecordScreen = () => {
         setLocationSubscription(null);
       }
     };
-  }, [isTracking, locationSubscription]);
-
-  useEffect(() => {
-    if (!isTracking && first == false) {
-      userStateSet();
-      handleData(userEmail, topSpeed, totalDistance, snowboarding, skiing);
-    }
   }, [isTracking]);
 
-  const userStateSet = () => {
-    setTotalDistance(tempTotalDistance);
-    setSkiing(skiingt);
-    setSnowboarding(snowboardingt);
-    setTopSpeed(tempTopSpeed);
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!isTracking && !first) {
+        await userStateSet();
+        await handleData(
+          userEmail,
+          topSpeed,
+          totalDistance,
+          snowboarding,
+          skiing
+        );
+      }
+    };
+
+    fetchData();
+  }, [isTracking, first]);
+
+  const userStateSet = async () => {
+    await setTotalDistance(tempTotalDistance);
+    await setSkiing(skiingt);
+    await setSnowboarding(snowboardingt);
+    await setTopSpeed(tempTopSpeed);
   };
 
   const toggleTracking = () => {
@@ -89,6 +99,8 @@ const RecordScreen = () => {
       setfirst(false);
       if (isTracking) {
         handleEntry();
+      } else {
+        userStateSet();
       }
     } else {
       alert("Please select Skiing or Snowboarding");
@@ -109,14 +121,14 @@ const RecordScreen = () => {
     }
   };
 
-  const handleEntry = () => {
-    setTempTotalDistance(0);
-    setTempTopSpeed(0);
-    setSkiingt(false);
-    setSnowboardingt(false);
+  const handleEntry = async () => {
+    await setTempTotalDistance(0);
+    await setTempTopSpeed(0);
+    await setSkiingt(false);
+    await setSnowboardingt(false);
   };
 
-  const handleData = async () => {
+  /*const handleData = async () => {
     try {
       console.log(
         "speed: " +
@@ -132,7 +144,7 @@ const RecordScreen = () => {
       }
 
       const { data } = await axios.post(
-        "http://192.168.1.19:8080/api/v1/auth/record",
+        "http://192.168.1.14:8080/api/v1/auth/record",
         { userEmail, topSpeed, totalDistance, snowboarding, skiing }
       );
 
@@ -149,6 +161,44 @@ const RecordScreen = () => {
       );
     } catch (error) {
       console.log(error);
+    }
+  };*/
+
+  const handleData = async () => {
+    try {
+      console.log(
+        "speed: " +
+          topSpeed +
+          " Distance: " +
+          totalDistance +
+          " email: " +
+          userEmail
+      );
+      if (!userEmail || !topSpeed || !totalDistance) {
+        alert("error in handle entry");
+        return;
+      }
+
+      const response = await axios.post(
+        "http://192.168.1.14:8080/api/v1/auth/record",
+        { userEmail, topSpeed, totalDistance, snowboarding, skiing }
+      );
+
+      const data = response.data;
+      alert(data && data.message);
+      console.log(
+        "speed, distance, snowboarding, skiing: " +
+          data.topSpeed +
+          " " +
+          data.totalDistance +
+          " " +
+          data.snowboarding +
+          " " +
+          data.skiing
+      );
+    } catch (error) {
+      console.log("Error in handleData:", error);
+      alert("An error occurred while handling data");
     }
   };
 

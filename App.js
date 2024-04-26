@@ -10,7 +10,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { UserProvider } from "./app/context/userContext.js";
-import { DarkModeProvider } from "./app/context/darkModeContext.js";
 import Entypo from "react-native-vector-icons/Entypo";
 import FontAwsome from "@expo/vector-icons/FontAwesome5.js";
 import MatComIcons from "react-native-vector-icons/MaterialCommunityIcons";
@@ -87,7 +86,7 @@ const App = () => {
   return (
     <UserProvider>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Login">
+        <Stack.Navigator initialRouteName="Tabs">
           <Stack.Screen
             options={{ headerShown: false }}
             name="Login"

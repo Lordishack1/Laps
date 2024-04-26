@@ -22,7 +22,7 @@ const CreateUserScreen = ({ navigation }) => {
         return;
       }
       const { data } = await axios.post(
-        "http://172.27.2.32:8080/api/v1/auth/register",
+        "http://192.168.1.14:8080/api/v1/auth/register",
         { name, email, password }
       );
       alert(data && data.message);

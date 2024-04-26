@@ -41,7 +41,7 @@ const StartScreen = ({ navigation }) => {
         return;
       }
       const { data } = await axios.post(
-        "http://192.168.1.19:8080/api/v1/auth/login",
+        "http://192.168.1.14:8080/api/v1/auth/login",
         { email, password }
       );
       setUserEmail(email);
