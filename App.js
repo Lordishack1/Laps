@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
+import { StatusBar } from "expo-status-bar";
 import StartScreen from "./app/screens/StartScreen.js";
 import RecordScreen from "./app/screens/RecordScreen.js";
 import CreateUserScreen from "./app/screens/CreateUserScreen.js";
@@ -86,7 +87,8 @@ const App = () => {
   return (
     <UserProvider>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Tabs">
+        <StatusBar barStyle="light-content" />
+        <Stack.Navigator initialRouteName="Login">
           <Stack.Screen
             options={{ headerShown: false }}
             name="Login"

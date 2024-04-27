@@ -40,18 +40,22 @@ const CreateUserScreen = ({ navigation }) => {
       <TextInput
         style={styles.buttonSpace}
         placeholder="Name"
+        placeholderTextColor="black"
         onChangeText={(e) => setName(e)}
         value={name}
       />
       <TextInput
         style={styles.buttonSpace}
         placeholder="Email"
+        placeholderTextColor="black"
         onChangeText={(e) => setEmail(e)}
         value={email}
       />
       <TextInput
         style={styles.buttonSpace}
         placeholder="Password"
+        placeholderTextColor="black"
+        secureTextEntry={true}
         onChangeText={(e) => setPassword(e)}
         value={password}
       />
@@ -76,7 +80,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   createTitle: {
-    fontSize: "40%",
+    fontSize: 40,
     paddingBottom: "10%",
   },
   buttonSpace: {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   ImageBackground,
   StyleSheet,
@@ -26,6 +27,14 @@ const StartScreen = ({ navigation }) => {
     console.log("User email changed:", userEmail);
   }, [userEmail]);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      // Clear the text inputs when the screen gains focus
+      setEmail("");
+      setPassword("");
+    }, [])
+  );
+
   const handleFocus = () => {
     setKeyVisible(true);
   };
@@ -45,7 +54,6 @@ const StartScreen = ({ navigation }) => {
         { email, password }
       );
       setUserEmail(email);
-      alert(data && data.message);
       navigation.navigate("Tabs");
       console.log("Login Data => ", { email, password });
     } catch (error) {
@@ -53,24 +61,15 @@ const StartScreen = ({ navigation }) => {
       console.log(error);
     }
   };
-  /*<KeyboardAwareScrollView
-        contentContainerStyle={
-          isKeyVisible ? styles.loginContainerUp : styles.loginContainer
-        }
-      ></KeyboardAwareScrollView>
-        <SafeAreaView style={styles.loginContainer}>
-        
-        
-        <Text style={styles.title}>Welcome to Laps!</Text>*/
-  return (
-    <KeyboardAvoidingView>
-      <View>
-        <ImageBackground
-          style={styles.background}
-          resizeMode="cover"
-          source={require("../assets/ima.jpeg")}
-        />
 
+  return (
+    <View>
+      <ImageBackground
+        style={styles.background}
+        resizeMode="cover"
+        source={require("../assets/ima.jpeg")}
+      />
+      <KeyboardAwareScrollView>
         <SafeAreaView style={styles.titlesAlign}>
           <Image
             style={styles.logo}
@@ -86,17 +85,21 @@ const StartScreen = ({ navigation }) => {
           <TextInput
             style={styles.textInput}
             placeholder="Email"
+            placeholderTextColor="black"
             onChangeText={(e) => setEmail(e)}
             onFocus={handleFocus}
             onBlur={handleBlur}
+            value={email}
           />
           <TextInput
             style={styles.textInput}
             placeholder="Password"
+            placeholderTextColor="black"
             secureTextEntry={true}
             onChangeText={(e) => setPassword(e)}
             onFocus={handleFocus}
             onBlur={handleBlur}
+            value={password}
           />
           <Button
             title="Login"
@@ -113,8 +116,8 @@ const StartScreen = ({ navigation }) => {
             color={"black"}
           />
         </SafeAreaView>
-      </View>
-    </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
+    </View>
   );
 };
 //calculating font size for the subtitle
@@ -128,7 +131,6 @@ const fontSizLogin = (windowWidth * fontSizePercentageLogin) / 100;
 
 const styles = StyleSheet.create({
   background: {
-    //backgroundColor: "black",
     flex: 1,
     width: Dimensions.get("screen").width,
     height: Dimensions.get("screen").height,
@@ -174,8 +176,8 @@ const styles = StyleSheet.create({
     marginTop: "10%",
     width: Dimensions.get("screen").width / 2,
     height: Dimensions.get("screen").width / 2,
-    borderWidth: "1px solid",
-    borderRadius: "100",
+    borderWidth: 1,
+    borderRadius: 100,
   },
   slogan: {
     marginTop: "10%",

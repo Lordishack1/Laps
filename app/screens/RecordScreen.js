@@ -128,42 +128,6 @@ const RecordScreen = () => {
     await setSnowboardingt(false);
   };
 
-  /*const handleData = async () => {
-    try {
-      console.log(
-        "speed: " +
-          topSpeed +
-          " Distance: " +
-          totalDistance +
-          " email: " +
-          userEmail
-      );
-      if (!userEmail || !topSpeed || !totalDistance) {
-        alert("error in handle entry");
-        return;
-      }
-
-      const { data } = await axios.post(
-        "http://192.168.1.14:8080/api/v1/auth/record",
-        { userEmail, topSpeed, totalDistance, snowboarding, skiing }
-      );
-
-      alert(data && data.message);
-      console.log(
-        "speed, distance, snowboarding, skiing: " +
-          data.topSpeed +
-          " " +
-          data.totalDistance +
-          " " +
-          data.snowboarding +
-          " " +
-          data.skiing
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  };*/
-
   const handleData = async () => {
     try {
       console.log(
@@ -295,7 +259,7 @@ const RecordScreen = () => {
         {isTracking ? (
           <MatComIcons
             name="pause-circle-outline"
-            size="65"
+            size={65}
             color="red"
             //title="STOP RECORDING"
             onPress={() => {
@@ -305,7 +269,7 @@ const RecordScreen = () => {
         ) : (
           <MatComIcons
             name="record-circle-outline"
-            size="65"
+            size={65}
             color="red"
             //title="RECORD"
             onPress={() => {

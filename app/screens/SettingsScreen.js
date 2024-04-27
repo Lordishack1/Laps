@@ -17,7 +17,7 @@ import Modal from "react-native-modal";
 import { useUser } from "../context/userContext.js";
 import axios from "axios";
 
-function SettingsScreen() {
+function SettingsScreen({ navigation }) {
   const [darkMode, setDarkMode] = useState(false);
   const [location, setLocation] = useState(false);
   const [modalVisEmail, setModalVisEmail] = useState(false);
@@ -99,7 +99,7 @@ function SettingsScreen() {
                 return;
               }
               const { data } = await axios.delete(
-                "http://172.27.2.32:8080/api/v1/auth/delete",
+                "http://192.168.1.14:8080/api/v1/auth/delete",
                 { data: { userEmail } }
               );
               navigation.navigate("Login");
